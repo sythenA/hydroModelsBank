@@ -1,0 +1,39 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Hydro Models Bank Entrance
+qgisMinimumVersion=2.0
+description=Entrance App for Models Bank of hydrology Models
+version=0.1
+author=ManySplendid co.
+email=yengtinglin@manysplendid.com
+
+about=水文水理模式庫入口插件 功能： 1. 提供CCHE1D下載 2. CCHE2D遠端操作(限特性網域)或CCHE2D測試版下載 3. CCHE3D遠端操作 4. RESED下載 5. SRH1D、SRH2D下載 6. SRH2D網格產生器及操作插件 7. GNetSIM、GLMRT操作介面 8. 即時淹水防護決策支援系統 9. 水文與文理分析系統
+
+tracker=https://github.com/sythenA/hydroModelsBank/issues
+repository=https://github.com/sythenA/hydroModelsBank
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=
+
+homepage=
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
