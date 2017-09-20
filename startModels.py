@@ -1,3 +1,4 @@
+# -*- coding: big5 -*-
 
 import os
 from PyQt4 import QtGui, uic
@@ -27,9 +28,30 @@ class callModels:
         elif model == 'SRH':
             self.callSRH()
             self.dlg.setWindowTitle('SRH')
+            self.dlg.init1D.clicked.connect(self.callSRH1D)
         else:
             self.callRESED()
             self.dlg.setWindowTitle('RESED')
+            self.dlg.init1D.clicked.connect(self.runRESED)
+            self.dlg.init2D.clicked.connect(self.viewRESEDManual)
+
+    def callSRH1D(self):
+        filePath = os.path.join(self.plugin_dir, 'SRH1D_table.xls')
+        os.system('"'+filePath+'"')
+        os.system("kill -9 %d" % (os.getpid()))
+        self.dlg.done(0)
+
+    def runRESED(self):
+        filePath = os.path.join(self.plugin_dir, 'RiverSimulation-20160629.exe')
+        os.system('"'+filePath+'"')
+        os.system("kill -9 %d" % (os.getpid()))
+        self.dlg.done(0)
+
+    def viewRESEDManual(self):
+        filePath = os.path.join(self.plugin_dir, 'RESEDManual20160627.pdf')
+        os.system('"'+filePath+'"')
+        os.system("kill -9 %d" % (os.getpid()))
+        self.dlg.done(0)
 
     def callCCHE(self):
         self.dlg.init1D.setText('CCHE1D')
@@ -42,9 +64,9 @@ class callModels:
         self.dlg.init3D.setText('SRH3D')
 
     def callRESED(self):
-        self.dlg.init1D.setText('RESED1D')
-        self.dlg.init2D.setText('RESED2D')
-        self.dlg.init3D.setText('RESED3D')
+        self.dlg.init1D.setText('RESED')
+        self.dlg.init2D.setText(u'使用者手冊')
+        self.dlg.init3D.setEnabled(False)
 
     def run(self):
         result = self.dlg.exec_()

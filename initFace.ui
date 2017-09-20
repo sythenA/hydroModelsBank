@@ -79,7 +79,7 @@
     <string>SRH</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="initGPU">
+  <widget class="QPushButton" name="initNetSIM">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -94,10 +94,10 @@
     </font>
    </property>
    <property name="text">
-    <string>GNetSIM  GLMRT</string>
+    <string>GNetSIM</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="initFloodReal">
+  <widget class="QPushButton" name="initGLMRT">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -108,11 +108,11 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>11</pointsize>
+     <pointsize>12</pointsize>
     </font>
    </property>
    <property name="text">
-    <string>即時淹水決策防護支援系統</string>
+    <string>GLMRT</string>
    </property>
   </widget>
   <widget class="QPushButton" name="initNTOUHydro">

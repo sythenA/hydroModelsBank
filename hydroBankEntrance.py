@@ -86,8 +86,8 @@ class hydroModelsBank:
         self.toolbar = self.iface.addToolBar(u'hydroModelsBank')
         self.toolbar.setObjectName(u'hydroModelsBank')
 
-        self.dlg.initGPU.clicked.connect(self.callGPU)
-        self.dlg.initFloodReal.clicked.connect(self.callFloodReal)
+        self.dlg.initNetSIM.clicked.connect(self.callNetSIM)
+        self.dlg.initGLMRT.clicked.connect(self.callGLMRT)
         self.dlg.initNTOUHydro.clicked.connect(self.callNTOUHydro)
 
         self.dlg.initCCHE.clicked.connect(self.callCCHE)
@@ -221,11 +221,11 @@ class hydroModelsBank:
         if res:
             self.dlg.done(0)
 
-    def callGPU(self):
+    def callNetSIM(self):
         os.system('start http://10.56.225.64:4260/wrpi/login.php')
 
-    def callFloodReal(self):
-        os.system('start http://10.56.225.64:4260/wordpress/')
+    def callGLMRT(self):
+        os.system('start http://10.56.225.64:4260/wrpi/login.php')
 
     def callNTOUHydro(self):
         os.system('start http://emh-123.wrap.gov.tw/wagis/river/index.html')
