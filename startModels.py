@@ -1,8 +1,10 @@
 # -*- coding: big5 -*-
 
 import os
+import _winreg
 from PyQt4 import QtGui, uic
 import qgis.utils
+import subprocess
 import MBFace
 
 
@@ -27,16 +29,30 @@ class callModels:
         if model == 'CCHE':
             self.callCCHE()
             self.dlg.setWindowTitle('CCHE')
+            self.dlg.init3D.clicked.connect(self.callCCHE3D)
         elif model == 'SRH':
             self.callSRH()
             self.dlg.setWindowTitle('SRH')
             self.dlg.init1D.clicked.connect(self.callSRH1D)
             self.dlg.init2D.clicked.connect(self.callMeshBuilder)
+            self.dlg.init3D.clicked.connect(self.callSRH3D)
         else:
             self.callRESED()
             self.dlg.setWindowTitle('RESED')
             self.dlg.init1D.clicked.connect(self.runRESED)
             self.dlg.init2D.clicked.connect(self.viewRESEDManual)
+
+        self.vncPath = ''
+        try:
+            reg = _winreg.ConnectRegistry(None, _winreg.HKEY_LOCAL_MACHINE)
+            k = _winreg.OpenKey(
+                reg, r'SOFTWARE\Classes\VncViewer.Config')
+            pathKey = _winreg.EnumKey(k, 0)
+            pathName = _winreg.QueryValue(k, pathKey)
+            pathName = pathName.split(',')[0]
+            self.vncPath = pathName
+        except:
+            pass
 
     def callSRH1D(self):
         filePath = os.path.join(self.plugin_dir, 'SRH1D_table.xls')
@@ -61,6 +77,12 @@ class callModels:
         self.dlg.init2D.setText('CCHE2D')
         self.dlg.init3D.setText('CCHE3D')
 
+    def callCCHE3D(self):
+        if self.vncPath:
+            self.dlg.done(0)
+            subprocess.Popen([self.vncPath, '210.69.15.31::5999',
+                             '-user', '07-gpu', '-password', '1!qaz2@wsx'])
+
     def callSRH(self):
         self.dlg.init1D.setText('SRH1D')
         self.dlg.init2D.setText('SRH2D')
@@ -83,6 +105,12 @@ class callModels:
             toolBar = MBFace.callMB(self.iface)
             self.dlg.done(0)
             toolBar.run()
+
+    def callSRH3D(self):
+        if self.vncPath:
+            self.dlg.done(0)
+            subprocess.Popen([self.vncPath, '210.69.15.31::5999',
+                             '-user', '07-gpu', '-password', '1!qaz2@wsx'])
 
     def run(self):
         result = self.dlg.exec_()
