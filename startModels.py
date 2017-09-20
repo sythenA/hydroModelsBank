@@ -2,6 +2,8 @@
 
 import os
 from PyQt4 import QtGui, uic
+import qgis.utils
+import MBFace
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -29,6 +31,7 @@ class callModels:
             self.callSRH()
             self.dlg.setWindowTitle('SRH')
             self.dlg.init1D.clicked.connect(self.callSRH1D)
+            self.dlg.init2D.clicked.connect(self.callMeshBuilder)
         else:
             self.callRESED()
             self.dlg.setWindowTitle('RESED')
@@ -37,21 +40,21 @@ class callModels:
 
     def callSRH1D(self):
         filePath = os.path.join(self.plugin_dir, 'SRH1D_table.xls')
+        self.dlg.done(0)
         os.system('"'+filePath+'"')
         os.system("kill -9 %d" % (os.getpid()))
-        self.dlg.done(0)
 
     def runRESED(self):
         filePath = os.path.join(self.plugin_dir, 'RiverSimulation-20160629.exe')
+        self.dlg.done(0)
         os.system('"'+filePath+'"')
         os.system("kill -9 %d" % (os.getpid()))
-        self.dlg.done(0)
 
     def viewRESEDManual(self):
         filePath = os.path.join(self.plugin_dir, 'RESEDManual20160627.pdf')
+        self.dlg.done(0)
         os.system('"'+filePath+'"')
         os.system("kill -9 %d" % (os.getpid()))
-        self.dlg.done(0)
 
     def callCCHE(self):
         self.dlg.init1D.setText('CCHE1D')
@@ -66,7 +69,20 @@ class callModels:
     def callRESED(self):
         self.dlg.init1D.setText('RESED')
         self.dlg.init2D.setText(u'使用者手冊')
+        self.dlg.init3D.setText(u'')
         self.dlg.init3D.setEnabled(False)
+
+    def callMeshBuilder(self):
+        installed = False
+        all_plugin = qgis.utils.available_plugins
+        for plugin in all_plugin:
+            if 'meshBuilder' in plugin:
+                installed = True
+
+        if installed:
+            toolBar = MBFace.callMB(self.iface)
+            self.dlg.done(0)
+            toolBar.run()
 
     def run(self):
         result = self.dlg.exec_()
