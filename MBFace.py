@@ -2,7 +2,6 @@
 import os
 from PyQt4 import QtGui, uic
 from PyQt4.QtCore import QSize
-from meshBuilder import meshBuilder
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -17,11 +16,13 @@ class callMBPopUp(QtGui.QDialog, FORM_CLASS):
 
 
 class callMB:
-    def __init__(self, iface):
+    def __init__(self, iface, MBModuleName):
         self.iface = iface
         self.plugin_dir = os.path.dirname(__file__)
         self.dlg = callMBPopUp()
         self.setIcon()
+        MB = __import__(str(MBModuleName) + '.meshBuilder')
+        self.MeshBuilder = MB
 
         self.dlg.initMBBtn.clicked.connect(self.initMBDiag)
         self.dlg.initSrhpre.clicked.connect(self.startSrhpre)
@@ -58,22 +59,26 @@ class callMB:
         self.dlg.initFlipLine.setIconSize(QSize(50, 50))
 
     def initMBDiag(self):
-        MBinterface = meshBuilder.meshBuilder(self.iface)
+        meshBuilder = self.MeshBuilder
+        MBinterface = meshBuilder.meshBuilder.meshBuilder(self.iface)
         self.dlg.done(0)
         MBinterface.run()
 
     def startSrhpre(self):
+        meshBuilder = self.MeshBuilder
         srhUI = meshBuilder.shepred.shepred(self.iface)
         self.dlg.done(0)
         srhUI.run()
 
     def startMesh2DViewer(self):
-        viewerUI = meshBuilder.mesh2DView(self.iface)
+        meshBuilder = self.MeshBuilder
+        viewerUI = meshBuilder.mesh2DViewer.mesh2DView(self.iface)
         self.dlg.done(0)
         viewerUI.run()
 
     def doLineFlip(self):
-        meshBuilder.flip()
+        meshBuilder = self.MeshBuilder
+        meshBuilder.lineFlip.flip()
 
     def run(self):
         result = self.dlg.exec_()
