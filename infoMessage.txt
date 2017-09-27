@@ -1,0 +1,18 @@
+101
+title:CCHE2D使用方式
+detail:
+若您位於水利署網域內，
+可透過遠端連線操作操作CCHE2D正式版。
+
+操作步驟如下：
+1. 點擊「正式版」按鈕啟動ultraVNC的遠端連線
+2. 使用者密碼為1!qaz2@wsx
+3. 啟動CCHE2D正式版
+
+若您並非位於水利署網域內，請使用「測試版」按鈕下載CCH2D
+測試版使用
+
+201
+title:找不到ultraVNC
+detail:
+遠端連線必需使用ultraVNC，請先安裝ultraVNC以啟動遠端連線功能

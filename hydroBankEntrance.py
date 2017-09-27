@@ -22,12 +22,10 @@
 """
 
 import os
-import _winreg
 from PyQt4 import QtGui, uic
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon
 from startModels import callModels
-from qgis.gui import QgsMessageBar
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -95,20 +93,6 @@ class hydroModelsBank:
         self.dlg.initCCHE.clicked.connect(self.callCCHE)
         self.dlg.initSRH.clicked.connect(self.callSRH)
         self.dlg.initRESED.clicked.connect(self.callRESED)
-
-        vncPath = ''
-        try:
-            reg = _winreg.ConnectRegistry(None, _winreg.HKEY_LOCAL_MACHINE)
-            k = _winreg.OpenKey(
-                reg, r'SOFTWARE\Classes\VncViewer.Config\DefaultIcon')
-            pathKey = _winreg.EnumKey(k, 0)
-            pathName = _winreg.QueryValue(k, pathKey)
-            pathName = pathName.split(',')[0]
-            self.iface.messageBar().pushMessage(
-                pathName, level=QgsMessageBar.INFO)
-            vncPath = pathName
-        except:
-            pass
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
