@@ -6,6 +6,7 @@ from PyQt4 import QtGui, uic
 import qgis.utils
 import subprocess
 import MBFace
+from selectorDiag import netSelector
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -29,6 +30,7 @@ class callModels:
         if model == 'CCHE':
             self.callCCHE()
             self.dlg.setWindowTitle('CCHE')
+            self.dlg.init2D.clicked.connect(self.callCCHE2D)
             self.dlg.init3D.clicked.connect(self.callCCHE3D)
         elif model == 'SRH':
             self.callSRH()
@@ -59,6 +61,11 @@ class callModels:
         self.dlg.done(0)
         os.system('"'+filePath+'"')
         os.system("kill -9 %d" % (os.getpid()))
+
+    def callCCHE2D(self):
+        title = u'CCHE2D使用方式'
+        selector = netSelector(self.iface, title)
+        selector.run()
 
     def runRESED(self):
         filePath = os.path.join(self.plugin_dir, 'RiverSimulation-20160629.exe')
@@ -100,9 +107,13 @@ class callModels:
         for plugin in all_plugin:
             if 'meshBuilder' in plugin:
                 installed = True
+                self.MBModel = plugin
+            elif 'MeshBuilder' in plugin:
+                installed = True
+                self.MBModel = plugin
 
         if installed:
-            toolBar = MBFace.callMB(self.iface)
+            toolBar = MBFace.callMB(self.iface, self.MBModel)
             self.dlg.done(0)
             toolBar.run()
 
