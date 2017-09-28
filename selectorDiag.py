@@ -24,7 +24,13 @@ class netSelector:
 
         self.dlg = selectorDiag()
         self.dlg.setWindowTitle(title)
+        self.dlg.getTestVer.clicked.connect(self.downLoadTestVer)
         self.dlg.lauchOfficial.clicked.connect(self.lauchVnc)
+
+    def downLoadTestVer(self):
+        os.system('start https://drive.google.com/file/d/0BwtvbTG03hXKQVhWczl0M\
+GFtOWs/view?usp=sharing')
+        self.dlg.done(0)
 
     def lauchVnc(self):
         self.dlg.done(0)

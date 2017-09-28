@@ -52,11 +52,11 @@
     </rect>
    </property>
    <property name="toolTip">
-    <string>下載測試版軟體</string>
+    <string>下載試用版軟體</string>
    </property>
    <property name="text">
     <string>下載
-測試版</string>
+試用版</string>
    </property>
   </widget>
  </widget>

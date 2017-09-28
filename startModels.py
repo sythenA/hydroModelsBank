@@ -30,6 +30,7 @@ class callModels:
         if model == 'CCHE':
             self.callCCHE()
             self.dlg.setWindowTitle('CCHE')
+            self.dlg.init1D.clicked.connect(self.callCCHE1D)
             self.dlg.init2D.clicked.connect(self.callCCHE2D)
             self.dlg.init3D.clicked.connect(self.callCCHE3D)
         elif model == 'SRH':
@@ -62,10 +63,17 @@ class callModels:
         os.system('"'+filePath+'"')
         os.system("kill -9 %d" % (os.getpid()))
 
+    def callCCHE1D(self):
+        path = 'https://drive.google.com/file/d/0BwtvbTG03hXKM21yN0w5Sm14ajA/vi\
+ew?usp=sharing'
+        os.system('start '+path)
+        self.dlg.done(0)
+
     def callCCHE2D(self):
         title = u'CCHE2D使用方式'
         selector = netSelector(self.iface, title)
         selector.run()
+        self.dlg.done(0)
 
     def runRESED(self):
         filePath = os.path.join(self.plugin_dir, 'RiverSimulation-20160629.exe')
@@ -80,6 +88,7 @@ class callModels:
         os.system("kill -9 %d" % (os.getpid()))
 
     def callCCHE(self):
+        self.dlg.init3D.setVisible(True)
         self.dlg.init1D.setText('CCHE1D')
         self.dlg.init2D.setText('CCHE2D')
         self.dlg.init3D.setText('CCHE3D')
@@ -91,6 +100,7 @@ class callModels:
                              '-user', '07-gpu', '-password', '1!qaz2@wsx'])
 
     def callSRH(self):
+        self.dlg.init3D.setVisible(True)
         self.dlg.init1D.setText('SRH1D')
         self.dlg.init2D.setText('SRH2D')
         self.dlg.init3D.setText('SRH3D')
@@ -100,6 +110,7 @@ class callModels:
         self.dlg.init2D.setText(u'使用者手冊')
         self.dlg.init3D.setText(u'')
         self.dlg.init3D.setEnabled(False)
+        self.dlg.init3D.setVisible(False)
 
     def callMeshBuilder(self):
         installed = False
