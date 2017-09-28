@@ -228,7 +228,10 @@ class hydroModelsBank:
         os.system('start http://10.56.225.64:4260/wrpi/login.php')
 
     def callNTOUHydro(self):
-        os.system('start http://emh-123.wrap.gov.tw/wagis/river/index.html')
+        window = callModels(self.iface, 'NTOUHydro')
+        res = window.run()
+        if res:
+            self.dlg.done(0)
 
     def run(self):
         """Run method that performs all the real work"""

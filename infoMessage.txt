@@ -12,6 +12,36 @@ detail:
 若您並非位於水利署網域內，請使用「測試版」按鈕下載CCH2D
 測試版使用
 
+102
+title:下載CCHE1D
+detail:
+CCHE1D可供免費下載使用
+關閉視窗後會開啟Google Drive下載連結
+請由連結下載
+
+103
+title:CCHE3D使用方式
+detail:
+CCHE3D限遠端連線使用
+
+若您位於水利署網域內，
+可透過遠端連線操作操作CCHE3D
+
+操作步驟如下：
+1. 關閉視窗後啟動UltraVNC的遠端連線
+2. 使用者密碼為1!qaz2@wsx
+3. 啟動CCHE3D
+
+104
+title:SRH-3D使用方式
+detail:
+SRH-3D目前為測試版，僅提供流場模擬功能
+欲使用SRH-3D請使用遠端連線至水規所電腦操作
+
+操作步驟如下：
+1. 關閉視窗後啟動UltraVNC的遠端連線
+2. 使用者密碼為1!qaz2@wsx
+
 201
 title:找不到ultraVNC
 detail:

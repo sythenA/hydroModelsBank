@@ -7,6 +7,7 @@ import qgis.utils
 import subprocess
 import MBFace
 from selectorDiag import netSelector
+from PyQt4.QtGui import QMessageBox
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -39,11 +40,16 @@ class callModels:
             self.dlg.init1D.clicked.connect(self.callSRH1D)
             self.dlg.init2D.clicked.connect(self.callMeshBuilder)
             self.dlg.init3D.clicked.connect(self.callSRH3D)
-        else:
+        elif model == 'RESED':
             self.callRESED()
             self.dlg.setWindowTitle('RESED')
             self.dlg.init1D.clicked.connect(self.runRESED)
             self.dlg.init2D.clicked.connect(self.viewRESEDManual)
+        else:
+            self.callNTOUHydro()
+            self.dlg.init1D.clicked.connect(self.callNTOUHydro_WRAP)
+            self.dlg.init2D.clicked.connect(self.callNTOUHydro_WRA)
+            self.dlg.init3D.clicked.connect(self.callNTOUHydro_author)
 
         self.vncPath = ''
         try:
@@ -55,13 +61,74 @@ class callModels:
             pathName = pathName.split(',')[0]
             self.vncPath = pathName
         except:
-            pass
+            title = u'找不到VncViewer'
+            message = u'在系統中找不到已安裝的VncViewer\n將無法啟用需要遠端連線\
+的功能'
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText(message)
+            msg.setWindowTitle(title)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
+
+    def callNTOUHydro(self):
+        self.dlg.init3D.setVisible(True)
+        self.dlg.init1D.setText(u'本地端使用\n(限水規所內網域)')
+        self.dlg.init2D.setText(u'遠端連線使用\n(限水利署內網域)')
+        self.dlg.init3D.setText(u'申請使用權限')
+
+    def callNTOUHydro_WRAP(self):
+        try:
+            reg = _winreg.ConnectRegistry(None, _winreg.HKEY_LOCAL_MACHINE)
+            key = _winreg.OpenKey(
+                reg, r'SOFTWARE\Wow6432Node\MicrosoftWindows\CurrentVersion\Uni\
+nstall\QGIS Wien\DisplayIcon')
+            pathKey = _winreg.EnumKey(key, 0)
+            pathName = _winreg.QueryValue(key, pathKey)
+
+            basePath = os.path.dirname(os.path.dirname(pathName))
+            batPath = os.path.join(basePath, 'bin', 'qgis-ltr.bat')
+
+            subprocess.Popen([batPath])
+        except:
+            title = u'找不到水文水理分析系統'
+            message = u'找不到水文水理分析系統\n請先至「申請權限」網頁下載軟體'
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText(message)
+            msg.setWindowTitle(title)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
+
+    def noVnc(self):
+        title = u'找不到VncViewer'
+        message = u'找不到已安裝的VncViewer\n請先安裝VncViewer再使用此功能'
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText(message)
+        msg.setWindowTitle(title)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+
+    def callNTOUHydro_WRA(self):
+        if self.vncPath:
+            self.dlg.done(0)
+            subprocess.Popen([self.vncPath, '210.69.15.31::5999',
+                             '-user', '07-gpu', '-password', '1!qaz2@wsx'])
+        else:
+            self.noVnc()
+        self.dlg.done(0)
+
+    def callNTOUHydro_author(self):
+        os.system('start http://emh-123.wrap.gov.tw/wagis/river/index.html')
+        self.dlg.done(0)
 
     def callSRH1D(self):
         filePath = os.path.join(self.plugin_dir, 'SRH1D_table.xls')
         self.dlg.done(0)
         os.system('"'+filePath+'"')
         os.system("kill -9 %d" % (os.getpid()))
+        self.dlg.done(0)
 
     def callCCHE1D(self):
         path = 'https://drive.google.com/file/d/0BwtvbTG03hXKM21yN0w5Sm14ajA/vi\
@@ -98,6 +165,10 @@ ew?usp=sharing'
             self.dlg.done(0)
             subprocess.Popen([self.vncPath, '210.69.15.31::5999',
                              '-user', '07-gpu', '-password', '1!qaz2@wsx'])
+        else:
+            self.noVnc()
+
+        self.dlg.done(0)
 
     def callSRH(self):
         self.dlg.init3D.setVisible(True)
@@ -133,6 +204,9 @@ ew?usp=sharing'
             self.dlg.done(0)
             subprocess.Popen([self.vncPath, '210.69.15.31::5999',
                              '-user', '07-gpu', '-password', '1!qaz2@wsx'])
+        else:
+            self.noVnc()
+        self.dlg.done(0)
 
     def run(self):
         result = self.dlg.exec_()
