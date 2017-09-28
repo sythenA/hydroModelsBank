@@ -8,6 +8,7 @@ import subprocess
 import MBFace
 from selectorDiag import netSelector
 from PyQt4.QtGui import QMessageBox
+from infoDiag import infoView
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -131,6 +132,8 @@ nstall\QGIS Wien\DisplayIcon')
         self.dlg.done(0)
 
     def callCCHE1D(self):
+        infoViewer = infoView(self.iface, 102)
+        infoViewer.run()
         path = 'https://drive.google.com/file/d/0BwtvbTG03hXKM21yN0w5Sm14ajA/vi\
 ew?usp=sharing'
         os.system('start '+path)
@@ -161,6 +164,8 @@ ew?usp=sharing'
         self.dlg.init3D.setText('CCHE3D')
 
     def callCCHE3D(self):
+        infoViewer = infoView(self.iface, 103)
+        infoViewer.run()
         if self.vncPath:
             self.dlg.done(0)
             subprocess.Popen([self.vncPath, '210.69.15.31::5999',
@@ -172,9 +177,9 @@ ew?usp=sharing'
 
     def callSRH(self):
         self.dlg.init3D.setVisible(True)
-        self.dlg.init1D.setText('SRH1D')
-        self.dlg.init2D.setText('SRH2D')
-        self.dlg.init3D.setText('SRH3D')
+        self.dlg.init1D.setText('SRH-1D')
+        self.dlg.init2D.setText('SRH-2D')
+        self.dlg.init3D.setText('SRH-3D')
 
     def callRESED(self):
         self.dlg.init1D.setText('RESED')
@@ -200,6 +205,8 @@ ew?usp=sharing'
             toolBar.run()
 
     def callSRH3D(self):
+        infoViewer = infoView(self.iface, 104)
+        result = infoViewer.run()
         if self.vncPath:
             self.dlg.done(0)
             subprocess.Popen([self.vncPath, '210.69.15.31::5999',
