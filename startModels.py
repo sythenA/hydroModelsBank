@@ -7,8 +7,12 @@ from PyQt4 import QtGui, uic
 import qgis.utils
 import subprocess
 import MBFace
+from toUnicode import toUnicode
+from qgis.PyQt.QtCore import QSettings
 from selectorDiag import netSelector
 from PyQt4.QtGui import QMessageBox, QFileDialog
+from msg import MSG
+from link import links
 from infoDiag import infoView
 
 
@@ -27,28 +31,9 @@ class callModels:
     def __init__(self, iface, model='SRH'):
         self.iface = iface
         self.plugin_dir = os.path.dirname(__file__)
-        self.readSetting()
         self.dlg = callModelsPopUp()
-
-        try:
-            self.vncPath = self.settings['VncViewerPath']
-        except:
-            try:
-                reg = _winreg.ConnectRegistry(None, _winreg.HKEY_LOCAL_MACHINE)
-                k = _winreg.OpenKey(
-                    reg, r'SOFTWARE\Classes\VncViewer.Config')
-                pathKey = _winreg.EnumKey(k, 0)
-                pathName = _winreg.QueryValue(k, pathKey)
-                pathName = pathName.split(',')[0]
-                self.vncPath = pathName
-                self.settings.update({'VncViewerPath': self.vncPath})
-
-                f = open(os.path.join(self.plugin_dir, 'settings'), 'w')
-                for key in self.settings.keys():
-                    f.write(key + ' = ' + self.settings[key] + '\n')
-                f.close()
-            except:
-                self.noVnc()
+        self.settings = QSettings('ManySplendid', 'HydroModelBanks')
+        self.vncPath = self.settings.value('vnc_path')
 
         if model == 'CCHE':
             self.callCCHE()
@@ -56,12 +41,14 @@ class callModels:
             self.dlg.init1D.clicked.connect(self.callCCHE1D)
             self.dlg.init2D.clicked.connect(self.callCCHE2D)
             self.dlg.init3D.clicked.connect(self.callCCHE3D)
+            self.dlg.init4.clicked.connect(self.callCCHE_MESH)
         elif model == 'SRH':
             self.callSRH()
             self.dlg.setWindowTitle('SRH')
             self.dlg.init1D.clicked.connect(self.callSRH1D)
-            self.dlg.init2D.clicked.connect(self.callMeshBuilder)
+            self.dlg.init2D.clicked.connect(self.callSRH2D)
             self.dlg.init3D.clicked.connect(self.callSRH3D)
+            self.dlg.init4.setVisible(False)
         elif model == 'RESED':
             self.callRESED()
             self.dlg.setWindowTitle('RESED')
@@ -69,40 +56,28 @@ class callModels:
             self.dlg.init2D.clicked.connect(self.viewRESEDManual)
         else:
             self.callNTOUHydro()
+            self.dlg.setWindowTitle(toUnicode(MSG['msg18']))
             self.dlg.init1D.clicked.connect(self.callNTOUHydro_WRAP)
             self.dlg.init2D.clicked.connect(self.callNTOUHydro_WRA)
             self.dlg.init3D.clicked.connect(self.callNTOUHydro_author)
 
     def callNTOUHydro(self):
+        self.dlg.init4.setVisible(False)
         self.dlg.init3D.setVisible(True)
-        self.dlg.init1D.setText(u'本地端使用\n(限水規所內網域)')
-        self.dlg.init2D.setText(u'遠端連線使用\n(限水利署內網域)')
-        self.dlg.init3D.setText(u'申請使用權限')
-
-    def readSetting(self):
-        try:
-            f = open(os.path.join(self.plugin_dir, 'settings'), 'r')
-            lines = f.readlines()
-            setting = dict()
-            for line in lines:
-                key = re.split('=', line)[0]
-                content = re.split('=', line)[1]
-                setting.update({key: content})
-            f.close()
-            self.settings = setting
-        except:
-            setting = dict()
-            self.settings = setting
+        self.dlg.init1D.setText(toUnicode(MSG['msg04']))
+        self.dlg.init2D.setText(toUnicode(MSG['msg05']))
+        self.dlg.init3D.setText(toUnicode(MSG['msg06']))
 
     def callNTOUHydro_WRAP(self):
         try:
-            batPath = self.settings['NTOUHydro']
+            batPath = self.settings.value('NTOUHydro')
             subprocess.Popen([batPath])
-        except:
+        except(TypeError):
             try:
                 reg = _winreg.ConnectRegistry(None, _winreg.HKEY_LOCAL_MACHINE)
                 key = _winreg.OpenKey(
-                    reg, r'SOFTWARE\Wow6432Node\MicrosoftWindows\CurrentVersion\
+                    reg,
+                    r'SOFTWARE\Wow6432Node\MicrosoftWindows\CurrentVersion\
 Uninstall\QGIS Wien\DisplayIcon')
                 pathKey = _winreg.EnumKey(key, 0)
                 pathName = _winreg.QueryValue(key, pathKey)
@@ -110,17 +85,16 @@ Uninstall\QGIS Wien\DisplayIcon')
                 basePath = os.path.dirname(os.path.dirname(pathName))
                 batPath = os.path.join(basePath, 'bin', 'qgis-ltr.bat')
 
-                self.settings.update({'NTOUHydro': batPath})
+                self.settings.setValue('NTOUHydro', batPath)
                 f = open(os.path.join(self.plugin_dir, 'settings'), 'w')
                 for key in self.settings.keys():
                     f.write(key + ' = ' + self.settings[key] + '\n')
                 f.close()
 
                 subprocess.Popen([batPath])
-            except:
-                title = u'找不到水文水理分析系統'
-                message = u'找不到水文水理分析系統\n請先至「申請權限」網頁下載\
-軟體'
+            except(WindowsError):
+                title = toUnicode(MSG['msg07'])
+                message = toUnicode(MSG['msg08'])
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
                 msg.setText(message)
@@ -128,21 +102,16 @@ Uninstall\QGIS Wien\DisplayIcon')
                 msg.setStandardButtons(QMessageBox.Ok)
                 msg.exec_()
 
-                Caption = u'請指定水文水理分析系統的執行路徑(qgis-ltr.bat)'
+                Caption = toUnicode(MSG['msg09'])
                 fileName = QFileDialog.getOpenFileName(self.dlg, Caption, '',
                                                        "*.bat")
                 if fileName:
-                    self.ntouHydroPath = fileName.encode('big5')
-                    self.settings.update({'NTOUHydro': self.ntouHydroPath})
-
-                    f = open(os.path.join(self.plugin_dir, 'settings'), 'w')
-                    for key in self.settings.keys():
-                        f.write(key + ' = ' + self.settings[key] + '\n')
-                    f.close()
+                    self.ntouHydroPath = toUnicode(fileName)
+                    self.settings.setValue('NTOUHydro', self.ntouHydroPath)
 
     def noVnc(self):
-        title = u'找不到VncViewer'
-        message = u'找不到已安裝的VncViewer\n請先安裝VncViewer再使用此功能'
+        title = toUnicode(MSG['msg01'])
+        message = toUnicode(MSG['msg03'])
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setText(message)
@@ -150,28 +119,25 @@ Uninstall\QGIS Wien\DisplayIcon')
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
-        Caption = u'請指定UltraVNC Viewer執行檔(vncviewer.exe)的路徑'
+        Caption = toUnicode(MSG['msg01'])
         fileName = QFileDialog.getOpenFileName(self.dlg, Caption, '', "*.exe")
         if fileName:
-            self.vncPath = fileName.encode('big5')
-            self.settings.update({'VncViewerPath': self.vncPath})
+            self.vncPath = toUnicode(fileName)
 
-            f = open(os.path.join(self.plugin_dir, 'settings'), 'w')
-            for key in self.settings.keys():
-                f.write(key + ' = ' + self.settings[key] + '\n')
-            f.close()
+            if self.vncPath:
+                self.settings.setValue('vnc_path', self.vncPath)
 
     def callNTOUHydro_WRA(self):
         if self.vncPath:
             self.dlg.done(0)
-            subprocess.Popen([self.vncPath, '210.69.15.31::5999',
-                             '-user', '07-gpu', '-password', '1!qaz2@wsx'])
+            subprocess.Popen([self.vncPath, links[17],
+                             '-user', links[18], '-password', links[19]])
             self.dlg.done(0)
         else:
             self.noVnc()
 
     def callNTOUHydro_author(self):
-        os.system('start http://emh-123.wrap.gov.tw/wagis/river/index.html')
+        os.system('start '+links[20])
         self.dlg.done(0)
 
     def callSRH1D(self):
@@ -184,19 +150,19 @@ Uninstall\QGIS Wien\DisplayIcon')
     def callCCHE1D(self):
         infoViewer = infoView(self.iface, 102)
         infoViewer.run()
-        path = 'https://drive.google.com/file/d/0BwtvbTG03hXKM21yN0w5Sm14ajA/vi\
-ew?usp=sharing'
+        path = links[1]
         os.system('start '+path)
         self.dlg.done(0)
 
     def callCCHE2D(self):
-        title = u'CCHE2D使用方式'
+        title = toUnicode(MSG['msg10'])
         selector = netSelector(self.iface, title)
         selector.run()
         self.dlg.done(0)
 
     def runRESED(self):
-        filePath = os.path.join(self.plugin_dir, 'RiverSimulation-20160629.exe')
+        filePath = os.path.join(self.plugin_dir,
+                                'RiverSimulation-20160629.exe')
         self.dlg.done(0)
         os.system('"'+filePath+'"')
         os.system("kill -9 %d" % (os.getpid()))
@@ -209,34 +175,65 @@ ew?usp=sharing'
 
     def callCCHE(self):
         self.dlg.init3D.setVisible(True)
+        self.dlg.init4.setVisible(True)
         self.dlg.init1D.setText('CCHE1D')
         self.dlg.init2D.setText('CCHE2D')
         self.dlg.init3D.setText('CCHE3D')
+        self.dlg.init4.setText('CCHE MESH')
 
     def callCCHE3D(self):
+        os.system('start ' + links[4])
+
         infoViewer = infoView(self.iface, 103)
         infoViewer.run()
         if self.vncPath:
             self.dlg.done(0)
-            subprocess.Popen([self.vncPath, '210.69.15.31::5999',
-                             '-user', '07-gpu', '-password', '1!qaz2@wsx'])
+            subprocess.Popen([self.vncPath, links[17],
+                             '-user', links[18], '-password', links[19]])
         else:
             self.noVnc()
 
         self.dlg.done(0)
+
+    def callCCHE_MESH(self):
+        os.system('start ' + links[5])
 
     def callSRH(self):
         self.dlg.init3D.setVisible(True)
         self.dlg.init1D.setText('SRH-1D')
         self.dlg.init2D.setText('SRH-2D')
         self.dlg.init3D.setText('SRH-3D')
+        self.dlg.init4.setVisible(False)
 
     def callRESED(self):
         self.dlg.init1D.setText('RESED')
-        self.dlg.init2D.setText(u'使用者手冊')
+        self.dlg.init2D.setText(toUnicode(MSG['msg11']))
         self.dlg.init3D.setText(u'')
         self.dlg.init3D.setEnabled(False)
         self.dlg.init3D.setVisible(False)
+        self.dlg.init4.setVisible(False)
+
+    def callSRH2D(self):
+        self.dlg.init3D.setVisible(True)
+        self.dlg.init4.setVisible(True)
+        self.dlg.init1D.setText(toUnicode(MSG['msg14']))
+        self.dlg.init2D.setText(toUnicode(MSG['msg15']))
+        self.dlg.init3D.setText(toUnicode(MSG['msg16']))
+        self.dlg.init4.setText(toUnicode(MSG['msg17']))
+
+        self.dlg.init1D.clicked.disconnect()
+        self.dlg.init2D.clicked.disconnect()
+        self.dlg.init3D.clicked.disconnect()
+        try:
+            self.dlg.init4.clicked.disconnect()
+        except(TypeError):
+            pass
+
+        self.dlg.setWindowTitle('SRH-2D')
+        self.dlg.init1D.clicked.connect(self.callMeshBuilder)
+        self.dlg.init2D.clicked.connect(self.getMeshBuilder)
+        self.dlg.init3D.clicked.connect(self.getTECViewer)
+        self.dlg.init4.clicked.connect(self.getImageMagick)
 
     def callMeshBuilder(self):
         installed = False
@@ -254,28 +251,35 @@ ew?usp=sharing'
             self.dlg.done(0)
             toolBar.run()
         else:
-            title = u'請先安裝SRH2D Mesh Builder QGIS插件'
-            message = u'SRH2D Mesh Builder插件尚未安裝\n請從關閉視窗後開啟的連\
-結下載SRH2D Mesh Builder安裝包'
+            title = toUnicode(MSG['msg12'])
+            message = toUnicode(MSG['msg13'])
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setText(message)
             msg.setWindowTitle(title)
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec_()
-            os.system('start https://drive.google.com/a/manysplendid.com/file/d\
-/0BwtvbTG03hXKR3NHeGEyYUl0T0U/view?usp=sharing')
+            os.system('start ' + links[7])
 
     def callSRH3D(self):
         infoViewer = infoView(self.iface, 104)
         result = infoViewer.run()
         if self.vncPath:
             self.dlg.done(0)
-            subprocess.Popen([self.vncPath, '210.69.15.31::5999',
-                             '-user', '07-gpu', '-password', '1!qaz2@wsx'])
+            subprocess.Popen([self.vncPath, links[17],
+                             '-user', links[18], '-password', links[19]])
             self.dlg.done(0)
         else:
             self.noVnc()
+
+    def getMeshBuilder(self):
+        os.system('start ' + links[7])
+
+    def getTECViewer(self):
+        os.system('start ' + links[13])
+
+    def getImageMagick(self):
+        os.system('start ' + links[6])
 
     def run(self):
         result = self.dlg.exec_()

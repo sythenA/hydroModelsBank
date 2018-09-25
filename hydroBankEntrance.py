@@ -24,8 +24,12 @@
 import os
 from PyQt4 import QtGui, uic
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4.QtGui import QAction, QIcon, QFileDialog
 from startModels import callModels
+from toUnicode import toUnicode
+from link import links
+from msg import MSG
+import _winreg
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -79,6 +83,22 @@ class hydroModelsBank:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
+        self.settings = QSettings('ManySplendid', 'HydroModelBanks')
+
+        try:
+            reg = _winreg.ConnectRegistry(None, _winreg.HKEY_LOCAL_MACHINE)
+            k = _winreg.OpenKey(
+                reg, r'SOFTWARE\Classes\VncViewer.Config')
+            pathKey = _winreg.EnumKey(k, 0)
+            pathName = _winreg.QueryValue(k, pathKey)
+            pathName = pathName.split(',')[0]
+            self.settings.setValue('vnc_path', pathName)
+        except(WindowsError):
+            pass
+
+        self.dlg.VNC_path_lbl.setText(self.settings.value('vnc_path'))
+        self.dlg.VNC_path_lbl.setToolTip(self.settings.value('vnc_path'))
+
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Hydro Models Bank Entrance')
@@ -93,6 +113,8 @@ class hydroModelsBank:
         self.dlg.initCCHE.clicked.connect(self.callCCHE)
         self.dlg.initSRH.clicked.connect(self.callSRH)
         self.dlg.initRESED.clicked.connect(self.callRESED)
+
+        self.dlg.changeVNCPathBtn.clicked.connect(self.setVNCpath)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -222,16 +244,23 @@ class hydroModelsBank:
             self.dlg.done(0)
 
     def callNetSIM(self):
-        os.system('start http://10.56.225.64:4260/wrpi/login.php')
+        os.system('start ' + links[16])
 
     def callGLMRT(self):
-        os.system('start http://10.56.225.64:4260/wrpi/login.php')
+        os.system('start ' + links[16])
 
     def callNTOUHydro(self):
         window = callModels(self.iface, 'NTOUHydro')
         res = window.run()
         if res:
             self.dlg.done(0)
+
+    def setVNCpath(self):
+        Caption = toUnicode(MSG['msg01'])
+        fileName = QFileDialog.getOpenFileName(self.dlg, Caption, '',
+                                               filter="*.exe")
+        if fileName:
+            self.settings.setValue('vnc_path', fileName)
 
     def run(self):
         """Run method that performs all the real work"""

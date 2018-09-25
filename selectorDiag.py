@@ -1,8 +1,11 @@
 
 import os
 from PyQt4 import QtGui, uic
-import _winreg
+from qgis.PyQt.QtCore import QSettings
+from msg import MSG
+from toUnicode import toUnicode
 import subprocess
+from link import links
 from infoDiag import infoView
 
 
@@ -21,6 +24,7 @@ class netSelector:
     def __init__(self, iface, title):
         self.iface = iface
         self.plugin_dir = os.path.dirname(__file__)
+        self.settings = QSettings('ManySplendid', 'HydroModelBanks')
 
         self.dlg = selectorDiag()
         self.dlg.setWindowTitle(title)
@@ -28,31 +32,20 @@ class netSelector:
         self.dlg.lauchOfficial.clicked.connect(self.lauchVnc)
 
     def downLoadTestVer(self):
-        os.system('start https://drive.google.com/file/d/0BwtvbTG03hXKQVhWczl0M\
-GFtOWs/view?usp=sharing')
+        os.system('start ' + links[2])
         self.dlg.done(0)
 
     def lauchVnc(self):
         self.dlg.done(0)
         infoViewer = infoView(self.iface, 101)
         result = infoViewer.run()
-        self.vncPath = ''
-        if result:
-            try:
-                reg = _winreg.ConnectRegistry(None, _winreg.HKEY_LOCAL_MACHINE)
-                k = _winreg.OpenKey(
-                    reg, r'SOFTWARE\Classes\VncViewer.Config')
-                pathKey = _winreg.EnumKey(k, 0)
-                pathName = _winreg.QueryValue(k, pathKey)
-                pathName = pathName.split(',')[0]
-                self.vncPath = pathName
-            except:
-                infoView(self.iface, 201)
-
-            subprocess.Popen([self.vncPath, '210.69.15.31::5999',
-                              '-user', '07-gpu', '-password', '1!qaz2@wsx'])
+        if self.settings.value('vnc_path'):
+            subprocess.Popen([self.vncPath, links[17],
+                              '-user', links[18], '-password', links[19]])
         else:
-            pass
+            QtGui.QMessageBox(QtGui.QMessageBox.critical,
+                              title=toUnicode(MSG['msg02']),
+                              text=toUnicode(MSG['msg03']))
 
     def run(self):
         self.dlg.exec_()

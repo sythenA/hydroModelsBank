@@ -66,7 +66,7 @@ class callMB:
 
     def startSrhpre(self):
         meshBuilder = self.MeshBuilder
-        srhUI = meshBuilder.shepred.shepred(self.iface)
+        srhUI = meshBuilder.srhpre.shepred.shepred(self.iface)
         self.dlg.done(0)
         srhUI.run()
 
